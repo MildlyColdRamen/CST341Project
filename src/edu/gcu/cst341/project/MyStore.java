@@ -46,7 +46,7 @@ public class MyStore {
 
 		String [] login = UserInterface.login();
 
-		String sql = "SELECT UserId, UserFirstName FROM users WHERE UserName = ? AND UserPassword = ? AND UserStatus = 1";
+		String sql = "SELECT UserId, UserFirstName FROM users WHERE UserName = ? AND UserPassword = ? AND UserStatus = 'active'";
 
 		try (PreparedStatement ps = con.getConnection().prepareStatement(sql)){
 			ps.setString(1, login[0]);
@@ -140,5 +140,8 @@ public class MyStore {
 		System.out.println();
 	}
 
+	public void austin() {
+		System.out.println("Austin");
+	}
 }
 

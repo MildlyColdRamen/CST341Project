@@ -46,7 +46,7 @@ public class MyStore {
 
 		String [] login = UserInterface.login();
 
-		String sql = "SELECT UserId, UserFirstName FROM users WHERE UserName = ? AND UserPassword = ? AND UserStatus = 1";
+		String sql = "SELECT UserId, UserFirstName FROM users WHERE UserName = ? AND UserPassword = ? AND UserStatus = 'active'";
 
 		try (PreparedStatement ps = con.getConnection().prepareStatement(sql)){
 			ps.setString(1, login[0]);
@@ -140,10 +140,16 @@ public class MyStore {
 		System.out.println();
 	}
 
+
 	// added method to print out name
 	// 19 Nov 20 - MP
 	private void michelob() {
 		System.out.println("Michelo");
+
+	
+	public void austin() {
+		System.out.println("Austin");
+
 	}
 }
 

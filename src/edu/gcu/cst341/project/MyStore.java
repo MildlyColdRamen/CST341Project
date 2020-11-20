@@ -140,5 +140,10 @@ public class MyStore {
 		System.out.println();
 	}
 
+	// added method to print out name
+	// 19 Nov 20 - MP
+	private void michelob() {
+		System.out.println("Michelo");
+	}
 }
 

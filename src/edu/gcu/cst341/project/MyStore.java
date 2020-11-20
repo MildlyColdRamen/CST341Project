@@ -139,6 +139,9 @@ public class MyStore {
 		System.out.println("Delete product...");
 		System.out.println();
 	}
+	private void abraham() {
+		System.out.println("Abraham");
+	}
 
 
 	// added method to print out name

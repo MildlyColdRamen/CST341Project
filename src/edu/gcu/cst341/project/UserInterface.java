@@ -71,6 +71,28 @@ public class UserInterface {
 		} while (option < 0 || option > 4);
 		return option;
 	}
-
+	
+	//Part of Update method
+	//Austin Bartram
+	public static boolean menuUpdate(){
+		int option = 0;
+		boolean opt = false;
+		do {
+			System.out.println("Restocked or Out of Stock?");
+			System.out.println("==================");
+			System.out.println("0] Out of Stock");
+			System.out.println("1] Restocked");			
+			System.out.println("==================");
+			option = sc.nextInt();
+			sc.nextLine();
+		} while (option < 0 || option > 1);
+			if (option == 0) {
+				opt = false;
+			}
+			if(option == 1) {
+				opt = true;
+			}
+		return opt;
+	}
 
 }

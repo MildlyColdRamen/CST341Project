@@ -143,8 +143,10 @@ public class MyStore {
 
 	// added method to print out name
 	// 19 Nov 20 - MP
+	// Test comment...
 	private void michelob() {
-		System.out.println("Michelo");
+		System.out.println("Michelob");
+	}
 
 	
 	public void austin() {

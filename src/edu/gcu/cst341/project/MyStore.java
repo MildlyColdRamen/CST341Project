@@ -436,8 +436,57 @@ public class MyStore {
 			}
 	}
 
+	// Added to allow Admin to update the stock status of products
+	// Austin Bartram  - 12/1/2020
 	private void updateProduct() {
+		
+		
 		System.out.println("Update product...");
+		System.out.println("Bringing up all products...");
+		//Statment to print all Products
+		try(Statement stmt = con.getConnection().createStatement();){
+
+			
+			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM cst341project.products;")){
+				while(rs.next()) {
+					System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") +
+							"| Price: " + rs.getBigDecimal("productPrice") + "| In Stock?: " + rs.getBoolean("stockStatus"));
+					System.out.println();
+				}
+				
+			}
+			//Asking Which to update and stores value
+			boolean inOrOut = UserInterface.menuUpdate();
+			
+			System.out.println("What Stock Status do you want to Update? (By ID Number)");
+			
+			int idNum = intCheck();
+			
+			
+			//Prepared statment to use with admins value
+			String updateSql = "UPDATE products SET stockStatus = ? WHERE productId = ?";
+			try(PreparedStatement ps = con.getConnection().prepareStatement(updateSql)){
+				ps.setBoolean(1, inOrOut);
+				ps.setInt(2, idNum);
+				ps.execute();
+			}
+			
+			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM cst341project.products;")){
+				while(rs.next()) {
+					System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") +
+							"| Price: " + rs.getBigDecimal("productPrice") + "| In Stock?: " + rs.getBoolean("stockStatus"));
+					System.out.println();
+				}
+				
+			}
+			System.out.println("Updated Status Returning to Menu...");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+
 		System.out.println();
 	}
 
@@ -506,8 +555,28 @@ public class MyStore {
 		System.out.println("Michelob");
 	}
 	
-		public void austin() {
-			System.out.println("Austin");
-
-		}
+	//Added Method to print my name
+	//11/19/2020 --Austin B
+	public void austin() {
+		System.out.println("Austin");
+	}
+	
+	//Added Method for checking if input is an integer
+	public int intCheck() {
+		boolean inputAccepted = false;
+		int idNum = 0;
+        while (!inputAccepted) {
+            try {
+                System.out.print("Please enter an ID Number: ");
+                idNum = Integer.valueOf(UserInterface.sc.nextLine());
+                if(idNum != 0) {
+                	inputAccepted = true;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Not a valid number: ");
+            }
+        }
+        System.out.println("Thank you!");
+		return idNum;
+	}
 }

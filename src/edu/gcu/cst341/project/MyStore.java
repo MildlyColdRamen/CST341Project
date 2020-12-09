@@ -414,19 +414,11 @@ public class MyStore {
 		System.out.println("View (Read) all products...");
 		try(Statement stmt = con.getConnection().createStatement();){
 			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM `cst341project`.products;")){
-
-	
-
-			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM cst341n.products;")){
 				while(rs.next()) {
 					System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") +
 							"| Price: " + rs.getBigDecimal("productPrice") + "| In Stock?: " + rs.getBoolean("stockStatus"));
 					System.out.println();
-					
 				}
-
-
-
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

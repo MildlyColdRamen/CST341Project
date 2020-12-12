@@ -353,7 +353,6 @@ public class MyStore {
 			}
 	}
 
-
 	// Added to allow Admin to update the stock status of products
 	// Austin Bartram  - 12/1/2020
 	// Modified to call readProducts() code that shows product details
@@ -381,6 +380,7 @@ public class MyStore {
 				ps.execute();
 			}
 			
+
 			// Print listing of all Products
 			readProducts();
 
@@ -388,7 +388,6 @@ public class MyStore {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
 		System.out.println();
 	}
 
@@ -484,11 +483,6 @@ public class MyStore {
                 System.out.println("Not a valid number: ");
             }
         }
-
         return idNum;
 	}
 }
-
-//
-// End
-//

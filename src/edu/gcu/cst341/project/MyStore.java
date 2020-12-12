@@ -15,7 +15,8 @@ public class MyStore {
 	
 	// Added variables....
 	// Mike P - 11/3/20
-	private int productNumber = 0;
+	// Removed unused variable productID...
+	// Mike P - 12/11/20
 	private String productName = "";
 	private double productPrice = 0.0;
 	private boolean productInStock = false;
@@ -57,6 +58,7 @@ public class MyStore {
 	}
 
 	private String login() {
+		
 		String result = null;
 
 		String[] login = UserInterface.login();
@@ -69,7 +71,7 @@ public class MyStore {
 			ResultSet rs = ps.executeQuery();
 
 			if (rs.next()) {
-				result = rs.getString("UserFirstName");
+				result = rs.getString("UserFirstName");		
 			} else {
 				result = null;
 			}
@@ -158,6 +160,9 @@ public class MyStore {
 
 	// added to createProduct
 	// Mike P - 11/3/20
+	// Updated method to remove setting Product ID as
+	// that field is autoIncrement now.
+	// Mike P - 12/11/20
 	private void createProduct() {
 		System.out.println("Add/Create product...");
 
@@ -168,89 +173,9 @@ public class MyStore {
 		int count = 0;
 		int numOfDecimals = 0;
 		int numOfSpaces = 0;
-		int option = -1;
 		
 		String keyInput = "";
 		String sql = "";
-
-		/* ***************************************************
-		 * This section is responsible for prompting the user for a valid Product Id.
-		 * A valid Product Id is a positive integer ...  We then test to see ifin the 
-		 * Product Id already exists and act accordingly...* */
-		do {
-			// Get product ID and check ifin one already exists...
-			// Loop until they get a good one...
-			// Make sure they enter a positive Int
-			do {
-				System.out.println("Enter new Product ID (positive numbers only please)");
-				
-				// Get input.....
-				keyInput = sc.nextLine();
-				
-				// Test for valid input.....  Needin an INT here
-				if (keyInput == null) {
-					exit1 = false;
-					System.out.println("Input Error, Product Id must be a number... Please try again..");
-				}
-				try {
-					option = Integer.parseInt(keyInput);
-
-					// Make sure itza positive, 
-					if (option <= 0) {
-						exit1 = false;
-						System.out.println("Input Error, Product Id must be Positive Please try again..");
-					} else {
-						exit1 = true;
-					}
-				} catch (NumberFormatException nfe) {
-					exit1 = false;
-					System.out.println("Input Error, Product Id must be a number... Please try again..");
-				}
-			} while (exit1 == false);
-			
-			// Reset flag for when it is used next...
-			exit1 = false;
-
-			// See ifin Product ID already exists...
-			if (option > 0) {
-				sql = "SELECT productId FROM products " + 
-						"WHERE products.productId = ?;";
-				
-				// Set up and run SQL statement....
-				try (PreparedStatement ps = con.getConnection().prepareStatement(sql)) {
-					ps.setInt(1, option);
-					ResultSet rs = ps.executeQuery();
-
-					//Get results and test.
-					if (rs.next()) {
-						sql = "SELECT productId FROM cst341project.products ORDER BY productId DESC;";
-						
-						try (PreparedStatement ps1 = con.getConnection().prepareStatement(sql)) {
-							ResultSet rs1 = ps1.executeQuery();
-							if (rs1.next()) {
-								productNumber = rs1.getInt("productId");
-								productNumber += 1;
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}							
-						System.out.println("Product ID already exists...  Next available number is: " + productNumber);
-					} else {
-						productNumber = option;
-						exit = true;
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}							
-			} else {
-				System.out.println("InValid Input, Please try again..");
-			}
-	
-		} while (exit == false);
-		
-		// Reset flag for next loopie..
-		// Get Product Name and check for length
-		exit = false;
 		
 		/* ***************************************************
 		 * This section is responsible for prompting the user for a valid Product Name.
@@ -365,15 +290,16 @@ public class MyStore {
 		 * asks the user if they  wish to add the Product into the 
 		 * database.....*/
 		do {
-			System.out.println("Product ID: \t\t" + productNumber);
 			System.out.println("Product Name: \t\t" + productName);
 			System.out.println("Product Price: \t\t" + productPrice);
+			
 			if (productInStock) {
 				System.out.println("Product Is In Stock: \tY");				
 			} else {
 				System.out.println("Product Is In Stock: \tN");
 			}
 			
+			// Ask if they wish to add product....
 			System.out.println("\nDo you wish to add the item above to the product database? Y or N");
 
 			// Get input.....
@@ -384,17 +310,16 @@ public class MyStore {
 				System.out.println("Updating database... Please wait....");
 
 				// Generate SQl command using prompted input.....
-				sql = "insert  into `products`(`productId`,`productName`,`productPrice`,`stockStatus`) values \n" + 
-						"(?, ?, ?, ?);";
+				sql = "insert  into `products`(`productName`,`productPrice`,`stockStatus`) values \n" + 
+						"(?, ?, ?);";
 				
 				// Add product to database.....well, try to
 				// but since input was checked, then
 				// everything should be ok, in theory...
 				try (PreparedStatement ps = con.getConnection().prepareStatement(sql)) {
-					ps.setInt(1, productNumber);
-					ps.setString(2, productName);
-					ps.setDouble(3, productPrice);
-					ps.setBoolean(4, productInStock);
+					ps.setString(1, productName);
+					ps.setDouble(2, productPrice);
+					ps.setBoolean(3, productInStock);
 					ps.execute();			
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -411,49 +336,41 @@ public class MyStore {
 	}  // End createProduct()
 
 	private void readProducts() {
-		System.out.println("View (Read) all products...");
+		// Modified print output formatting to remove extra line break...
+		// Mike P - 12/11/20
+		System.out.println("Here is a listing of all available products...");
 		try(Statement stmt = con.getConnection().createStatement();){
 			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM `cst341project`.products;")){
 				while(rs.next()) {
-					System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") +
-							"| Price: " + rs.getBigDecimal("productPrice") + "| In Stock?: " + rs.getBoolean("stockStatus"));
-					System.out.println();
+					System.out.println("ID: | " + rs.getInt("productId") + " | " + rs.getString("productName") +
+							" | Price: " + rs.getBigDecimal("productPrice") + " | In Stock?: " + rs.getBoolean("stockStatus"));
 				}
+				System.out.println();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}} catch (SQLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 	}
 
 	// Added to allow Admin to update the stock status of products
 	// Austin Bartram  - 12/1/2020
+	// Modified to call readProducts() code that shows product details
+	// Mike P - 12/11/20
 	private void updateProduct() {
 		
-		
-		System.out.println("Update product...");
-		System.out.println("Bringing up all products...");
-		//Statment to print all Products
+		// Try to connect to database.....
 		try(Statement stmt = con.getConnection().createStatement();){
 
-			
-			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM cst341project.products;")){
-				while(rs.next()) {
-					System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") +
-							"| Price: " + rs.getBigDecimal("productPrice") + "| In Stock?: " + rs.getBoolean("stockStatus"));
-					System.out.println();
-				}
-				
-			}
+			// Print listing of all Products
+			readProducts();
+	
 			//Asking Which to update and stores value
 			boolean inOrOut = UserInterface.menuUpdate();
 			
 			System.out.println("What Stock Status do you want to Update? (By ID Number)");
 			
 			int idNum = intCheck();
-			
 			
 			//Prepared statment to use with admins value
 			String updateSql = "UPDATE products SET stockStatus = ? WHERE productId = ?";
@@ -463,25 +380,20 @@ public class MyStore {
 				ps.execute();
 			}
 			
-			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM cst341project.products;")){
-				while(rs.next()) {
-					System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") +
-							"| Price: " + rs.getBigDecimal("productPrice") + "| In Stock?: " + rs.getBoolean("stockStatus"));
-					System.out.println();
-				}
-				
-			}
-			System.out.println("Updated Status Returning to Menu...");
+
+			// Print listing of all Products
+			readProducts();
+
+			System.out.println("Status successfully updated, returning to Administration Menu...");
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-
-
 		System.out.println();
 	}
 
+	// Removed couple of commented out lines...
+	// NO changes made to source code..
+	// Mike P - 12/11/20
 	private void deleteProduct() {
 		System.out.println("Delete product...");
 		System.out.println("Showing all products...");
@@ -495,10 +407,8 @@ public class MyStore {
 				}
 
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}} catch (SQLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		System.out.println("Which product would you like to delete? (Select ID Number");
@@ -510,7 +420,6 @@ public class MyStore {
 			ps.execute();
 			
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Deleted Select Product");
@@ -525,10 +434,8 @@ public class MyStore {
 				}
 
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}} catch (SQLException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		
@@ -554,21 +461,28 @@ public class MyStore {
 	}
 	
 	//Added Method for checking if input is an integer
+	// MP - 12/11/20 modified to make sure its positive...
+	// and put else condition to print try again...
 	public int intCheck() {
+		
 		boolean inputAccepted = false;
 		int idNum = 0;
+		
         while (!inputAccepted) {
             try {
                 System.out.print("Please enter an ID Number: ");
+                
                 idNum = Integer.valueOf(UserInterface.sc.nextLine());
-                if(idNum != 0) {
+                
+                if(idNum != 0 && idNum > 0) {
                 	inputAccepted = true;
+                } else {
+                    System.out.println("Not a valid number.  Please try again!");               	
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Not a valid number: ");
             }
         }
-        System.out.println("Thank you!");
-		return idNum;
+        return idNum;
 	}
 }

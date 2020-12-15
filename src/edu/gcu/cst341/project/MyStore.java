@@ -307,6 +307,7 @@ public class MyStore {
 		return productId;
 	} // End getProductInfo (
 //	Abraham Gamez 12/14/2020
+	
 	private void readCartItems() {
 		System.out.println("Viewing your shopping cart...");
 		try(Statement stmt = con.getConnection().createStatement();){

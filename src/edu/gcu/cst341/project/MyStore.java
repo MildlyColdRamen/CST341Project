@@ -161,6 +161,7 @@ public class MyStore {
 	// Updated method to test for valid input.
 	private void createCartItem() {
 
+
 		boolean exitCreateCart = false;
 
 		// Used for keyboard input...
@@ -307,14 +308,233 @@ public class MyStore {
 		return productId;
 	} // End getProductInfo ()
 
+		boolean exitCreateCart = false;
+
+		// Used for keyboard input...
+		String keyInput = "";
+
+		// Main loop to process input
+		do {
+
+			// Is this a new Order??? Generate order number
+			if (newCartOrder) {
+				newCartOrder = false;
+				try (Statement stmt = con.getConnection().createStatement();) {
+					try (ResultSet rs = stmt
+							.executeQuery("SELECT orderNumber FROM shoppingcart ORDER BY orderNumber DESC;")) {
+
+						// See if there is a existing order number, it sorts in descending order
+						// so the latest number is first out...
+						if (rs.next()) {
+							orderNumber = rs.getInt("orderNumber");
+							orderNumber += 1;
+						} else { // There are no orders in DB, start ours at 100...
+							orderNumber = 100;
+						}
+					}
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+
+			System.out.println(userIdName + " your Shopping Cart Order Number is: " + orderNumber);
+			System.out.println("Bringing up available Products\n");
+
+			// Print out products in stock only.....
+			try (Statement stmt = con.getConnection().createStatement();) {
+				try (ResultSet rs = stmt.executeQuery(
+						"SELECT productId, productName, productPrice, stockStatus FROM `cst341project`.products Where stockStatus = 1;")) {
+					while (rs.next()) {
+						System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName")
+								+ "| Price: " + rs.getBigDecimal("productPrice"));
+					}
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+
+			// Asking Which to add to cart
+			int productAdded = getProductInfo();
+
+			System.out.println("\nHow Many are we buying?");
+			int quantity = intCheck();
+
+			System.out.println("\nProduct ID: \t\t" + productAdded);
+			System.out.println("Product Name: \t\t" + productName);
+			System.out.println("Product Price: \t\t" + productPrice);
+			System.out.println("Quantity Ordered: \t" + quantity);
+
+			String addToCartSql = "Insert into shoppingcart (orderNumber, userId, productId, productName, "
+					+ "productPrice, productQuantity)  value(?, ?, ?, ?, ?, ?);";
+
+			// Ask if they wish to add product....
+			System.out.println("\n" + userIdName + ", do you wish to add the item above to your shopping cart? Y or N");
+
+			// Get input.....
+			keyInput = sc.nextLine();
+
+			// Make sure input is a Y or N only.....
+			if (keyInput.equals("y") || keyInput.equals("Y")) {
+
+				try (Statement stmt = con.getConnection().createStatement();) {
+					try (PreparedStatement ps = con.getConnection().prepareStatement(addToCartSql)) {
+						ps.setInt(1, orderNumber);
+						ps.setInt(2, userIdNumber);
+						ps.setInt(3, productAdded);
+						ps.setNString(4, productName);
+						ps.setDouble(5, productPrice);
+						ps.setInt(6, quantity);
+						ps.execute();
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+
+				System.out.println("Added " + productName + " to " + userIdName + "'s Shopping Cart...");
+
+			} else if (keyInput.equals("n") || keyInput.equals("N")) {
+				System.out.println("No item was added to" + userIdName + "'s shopping cart....\n");
+			} else {
+				System.out.println("There was an input error, Please try again");
+			}
+
+			// Prompt for and get input.....
+			System.out.println("\n" + userIdName + ", do you wish to add any more items to your shopping cart? Y or N");
+			keyInput = sc.nextLine();
+
+			// Make sure input is a Y only.....
+			if (keyInput.equals("y") || keyInput.equals("Y")) {
+				exitCreateCart = false;
+			} else {
+				exitCreateCart = true;
+			}
+		} while (exitCreateCart == false);
+
+		System.out.println("Returning to Menu");
+	} // End createCartItem ()
+
+	// Mike P - 12/13/20
+	// Added method to verify product ID is valid, and
+	// to get pertinent info from database....
+	private int getProductInfo() {
+
+		int productId = 0;
+		boolean exit = false;
+
+		String sql = "";
+
+		do {
+			System.out.println("\nWhich Product to Add? (By ID)");
+			productId = intCheck();
+
+			sql = "SELECT productId, productPrice, productName FROM products " + "WHERE products.productId = ? AND stockStatus = 1;";
+
+			// Set up and run SQL statement.... to see ifin product exists...
+			try (Statement stmt = con.getConnection().createStatement();) {
+				try (PreparedStatement ps = con.getConnection().prepareStatement(sql)) {
+					ps.setInt(1, productId);
+					ResultSet rs = ps.executeQuery();
+
+					// Get results and test.
+					if (rs.next()) {
+						productPrice = rs.getDouble("productPrice");
+						productName = rs.getString("productName");
+						exit = true; // Product is valid...
+					} else {
+						System.out.println("Product ID does not exists, Please try again..");
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		} while (exit == false);
+
+		return productId;
+	} // End getProductInfo (
+//	Abraham Gamez 12/14/2020
+	
 	private void readCartItems() {
-		System.out.println("View (Read) cart...");
-		System.out.println();
+		System.out.println("Viewing your shopping cart...");
+		try(Statement stmt = con.getConnection().createStatement();){
+
+			try (ResultSet rs = stmt.executeQuery("SELECT orderNumber, userId, productId, productName, productPrice, productQuantity, dateAndTime FROM cst341project.shoppingcart;")){
+
+				System.out.println("Your shopping cart");
+
+				while(rs.next()) {
+
+					System.out.println("Order:" + rs.getInt("orderNumber") + " ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") + "| " + rs.getDouble("productPrice") + "| " +rs.getInt("productQuantity"));
+				}
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try(Statement stmt = con.getConnection().createStatement();){
+
+
+			try (ResultSet rs = stmt.executeQuery("SELECT sum(productPrice * productQuantity) as \"subTotal\" FROM cst341project.shoppingcart;")){
+
+				while(rs.next()) {
+					System.out.println("Subtotal: $" + rs.getDouble("subTotal") + "\n");
+				}
+
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
+	// Alex Metzler 12/14/2020
 
 	private void deleteCartItem() {
 		System.out.println("Delete from cart...");
-		System.out.println();
+		try(Statement stmt = con.getConnection().createStatement();){
+			try (ResultSet rs = stmt.executeQuery("SELECT orderNumber, userId, productId, productName, productPrice, productQuantity, dateAndTime FROM cst341project.shoppingcart;")){
+				System.out.println("Your shopping cart");
+				while(rs.next()) {
+					System.out.println("Order:" + rs.getInt("orderNumber") + " ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") + "| " + rs.getDouble("productPrice") + "| " +rs.getInt("productQuantity"));
+				}
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		System.out.println("Which product would you like to delete? (Select ID Number");
+		int idNumber = UserInterface.sc.nextInt();
+		UserInterface.sc.nextLine();
+		String sql = "Delete From cst341project.shoppingcart where productId = ?;";
+		try (PreparedStatement ps = con.getConnection().prepareStatement(sql)) {
+			ps.setInt(1, idNumber);
+			ps.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Deleted Select Product");
+		try (Statement stmt = con.getConnection().createStatement();) {
+			try (ResultSet rs = stmt
+					.executeQuery("SELECT orderNumber, userId, productId, productName, productPrice, productQuantity, dateAndTime FROM cst341project.shoppingcart;")) {
+//				Remember to changed it to the name of your database for the group project
+				while (rs.next()) {
+					System.out.println("Order:" + rs.getInt("orderNumber") + " ID: |" + rs.getInt("productId") + "| " + rs.getString("productName") + "| " + rs.getDouble("productPrice") + "| " +rs.getInt("productQuantity"));
+					System.out.println();
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	// added to createProduct
@@ -594,8 +814,8 @@ public class MyStore {
 		System.out.println("Deleted Select Product");
 		try (Statement stmt = con.getConnection().createStatement();) {
 
-			try (ResultSet rs = stmt
-					.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM cst341n.products;")) {
+			try (ResultSet rs = stmt.executeQuery("SELECT productId, productName, productPrice, stockStatus FROM cst341project.products;")) {
+
 //				Remember to changed it to the name of your database for the group project
 				while (rs.next()) {
 					System.out.println("ID: |" + rs.getInt("productId") + "| " + rs.getString("productName")
